@@ -1,5 +1,5 @@
-import { defineConfig } from 'tsup';
-import { isDev } from './scripts/utils';
+import { defineConfig } from 'tsup'
+import { isDev } from './scripts/utils'
 
 export default defineConfig(() => ({
   entry: {
@@ -14,4 +14,4 @@ export default defineConfig(() => ({
   },
   minifyWhitespace: !isDev,
   minifySyntax: !isDev,
-}));
+}))

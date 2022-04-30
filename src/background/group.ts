@@ -1,4 +1,4 @@
-import { Rule } from './rule'
+import { Rule } from '../rule'
 import { DataMap, matchRule, removeTabs, getDomain } from './helpers'
 
 export async function groupByRules(
@@ -71,7 +71,7 @@ export async function groupByDomain(
 async function mergeGroup(groupId: number, tabIds: number[]) {
   await Promise.all([
     chrome.tabGroups.update(groupId, {
-      collapsed: true,
+      collapsed: false,
     }),
     chrome.tabs.group({
       groupId,
@@ -88,8 +88,10 @@ async function createGroup(title: string, tabIds: number[]) {
     },
   })
 
-  await chrome.tabGroups.update(groupId, {
-    title,
-    collapsed: true,
-  })
+  await Promise.all([
+    chrome.tabGroups.update(groupId, {
+      title,
+      collapsed: false,
+    }),
+  ])
 }

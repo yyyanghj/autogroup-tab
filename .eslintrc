@@ -1,3 +1,6 @@
 {
-  "extends": "@yyyanghj"
+  "extends": "@yyyanghj",
+  "rules": {
+    "react-hooks/rules-of-hooks": "off"
+  }
 }

@@ -1,5 +1,4 @@
 import fs from 'fs-extra'
-import type { Manifest } from 'webextension-polyfill'
 import type PkgType from '../package.json'
 import { isDev, port, r } from '../scripts/utils'
 
@@ -8,7 +7,7 @@ export async function getManifest() {
 
   // update this file to update this manifest.json
   // can also be conditional based on your need
-  const manifest: Manifest.WebExtensionManifest = {
+  const manifest = {
     manifest_version: 3,
     name: pkg.displayName || pkg.name,
     version: pkg.version,

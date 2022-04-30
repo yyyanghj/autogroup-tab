@@ -1,8 +1,19 @@
 import { onMessage } from 'webext-bridge'
 import { debounce } from 'lodash-es'
 import { DataMap } from './helpers'
-import { rules } from './rule'
+import { Rule } from '../rule'
 import { groupByRules, groupByDomain } from './group'
+// import { useStorageLocal } from '../composables/useStorageLocal'
+
+let rules: Rule[] = []
+
+async function init() {
+  const store = await chrome.storage.local.get('autogroup-tab-rules')
+
+  rules = store['autogroup-tab-rules'] || []
+}
+
+init()
 
 chrome.runtime.onInstalled.addListener((): void => {
   // eslint-disable-next-line no-console
@@ -19,6 +30,18 @@ chrome.tabs.onUpdated.addListener(() => {
 
 onMessage('group-tabs', async () => {
   groupTabs()
+})
+
+onMessage('get-rules', async () => {
+  return rules
+})
+
+onMessage('update-rules', async message => {
+  const { data } = message
+  rules = (data as { rules: Rule[] }).rules
+  chrome.storage.local.set({
+    'autogroup-tab-rules': rules,
+  })
 })
 
 const groupTabs = debounce(async function () {

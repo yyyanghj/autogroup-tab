@@ -2,7 +2,7 @@
   "name": "auto-group",
   "displayName": "Autogroup Tabs",
   "version": "0.0.1",
-  "description": "[description]",
+  "description": "Automatically group tabs based on your configuration rules.",
   "private": true,
   "scripts": {
     "dev": "npm run clear && run-p build:*",
@@ -32,7 +32,6 @@
     "@types/fs-extra": "^9.0.13",
     "@types/lodash-es": "^4.17.6",
     "@types/node": "^17.0.25",
-    "@types/webextension-polyfill": "^0.8.3",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@vitejs/plugin-vue": "^2.3.1",
     "@vue/compiler-sfc": "^3.2.33",
@@ -62,7 +61,7 @@
     "vue-demi": "^0.12.5",
     "web-ext": "^6.8.0",
     "webext-bridge": "^5.0.4",
-    "webextension-polyfill": "^0.9.0"
+    "windicss": "^3.5.1"
   },
   "dependencies": {
     "lodash-es": "^4.17.21"

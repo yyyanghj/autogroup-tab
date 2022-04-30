@@ -1,5 +1,7 @@
 {
-  "cSpell.words": ["Vitesse"],
+  "cSpell.words": [
+    "Vitesse"
+  ],
   "typescript.tsdk": "node_modules/typescript/lib",
   "volar.tsPlugin": true,
   "volar.tsPluginStatus": false,
@@ -8,6 +10,6 @@
     "source.fixAll.eslint": true,
   },
   "files.associations": {
-    "*.css": "postcss",
+    "*.css": "css"
   },
 }

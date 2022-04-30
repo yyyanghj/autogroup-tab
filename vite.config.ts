@@ -29,9 +29,7 @@ export const sharedConfig: UserConfig = {
       imports: [
         'vue',
         {
-          'webextension-polyfill': [
-            ['*', 'browser'],
-          ],
+          'webextension-polyfill': [['*', 'browser']],
         },
       ],
       dts: r('src/auto-imports.d.ts'),
@@ -51,7 +49,9 @@ export const sharedConfig: UserConfig = {
     }),
 
     // https://github.com/antfu/unplugin-icons
-    Icons(),
+    Icons({
+      scale: 1,
+    }),
 
     // rewrite assets to use relative path
     {
@@ -64,14 +64,8 @@ export const sharedConfig: UserConfig = {
     },
   ],
   optimizeDeps: {
-    include: [
-      'vue',
-      '@vueuse/core',
-      'webextension-polyfill',
-    ],
-    exclude: [
-      'vue-demi',
-    ],
+    include: ['vue', '@vueuse/core', 'webextension-polyfill'],
+    exclude: ['vue-demi'],
   },
 }
 
