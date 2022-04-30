@@ -1,20 +1,20 @@
 {
-  "name": "vitesse-webext",
-  "displayName": "Vitesse WebExt",
+  "name": "auto-group",
+  "displayName": "Autogroup Tabs",
   "version": "0.0.1",
   "description": "[description]",
   "private": true,
   "scripts": {
-    "dev": "npm run clear && cross-env NODE_ENV=development run-p dev:*",
+    "dev": "npm run clear && run-p build:*",
     "dev:prepare": "esno scripts/prepare.ts",
     "dev:web": "vite",
     "dev:js": "npm run build:js -- --mode development",
     "dev:bg": "tsup --watch ./src",
     "build": "cross-env NODE_ENV=production run-s clear build:web build:prepare build:js build:bg",
     "build:prepare": "esno scripts/prepare.ts",
-    "build:web": "vite build",
-    "build:js": "vite build --config vite.config.content.ts",
-    "build:bg": "tsup",
+    "build:web": "vite build --watch",
+    "build:js": "vite build --config vite.config.content.ts --watch",
+    "build:bg": "tsup --watch ./src",
     "pack": "cross-env NODE_ENV=production run-p pack:*",
     "pack:zip": "rimraf extension.zip && jszip-cli add extension/* -o ./extension.zip",
     "pack:crx": "crx pack extension -o ./extension.crx",
@@ -22,21 +22,24 @@
     "start:chromium": "web-ext run --source-dir ./extension --target=chromium",
     "start:firefox": "web-ext run --source-dir ./extension --target=firefox-desktop",
     "clear": "rimraf extension/dist extension/manifest.json extension.*",
-    "lint": "eslint '{src,scripts}/**/*.{json,ts,js,vue}'",
+    "lint": "eslint --fix '{src,scripts}/**/*.{json,ts,js,vue}'",
     "test": "vitest test"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.20.6",
     "@ffflorian/jszip-cli": "^3.1.6",
     "@iconify/json": "^2.1.30",
+    "@types/chrome": "^0.0.183",
     "@types/fs-extra": "^9.0.13",
+    "@types/lodash-es": "^4.17.6",
     "@types/node": "^17.0.25",
     "@types/webextension-polyfill": "^0.8.3",
-    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@vitejs/plugin-vue": "^2.3.1",
     "@vue/compiler-sfc": "^3.2.33",
     "@vue/test-utils": "^2.0.0-rc.20",
     "@vueuse/core": "^8.2.6",
+    "@yyyanghj/eslint-config": "^1.0.0",
+    "@yyyanghj/tsconfig": "^1.0.1",
     "chokidar": "^3.5.3",
     "cross-env": "^7.0.3",
     "crx": "^5.0.1",
@@ -60,5 +63,8 @@
     "web-ext": "^6.8.0",
     "webext-bridge": "^5.0.4",
     "webextension-polyfill": "^0.9.0"
+  },
+  "dependencies": {
+    "lodash-es": "^4.17.21"
   }
 }
