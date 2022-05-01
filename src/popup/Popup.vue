@@ -4,36 +4,41 @@ import { ref, onMounted, watch } from 'vue'
 import RuleItem from './Rule.vue'
 import { Rule, Settings } from '../common/types'
 import { GET_SETTINGS, UPDATE_SETTINGS, GROUP_TABS } from '../common/constants'
+import { throttle } from 'lodash-es'
 
 const rules = ref<Rule[]>([])
 const expand = ref('')
 
 const autoGroup = ref(false)
 const groupByDomain = ref(false)
+const minCount = ref(1)
 
-watch([autoGroup, groupByDomain], () => {
+watch([autoGroup, groupByDomain, minCount], () => {
   updateSettings()
 })
 
-const updateSettings = () => {
+const updateSettings = throttle(() => {
+  const count = Number(minCount.value)
   sendMessage(UPDATE_SETTINGS, {
     rules: rules.value,
     autoGroup: autoGroup.value,
     groupByDomain: groupByDomain.value,
+    minCount: Number.isNaN(count) ? 3 : Math.max(2, minCount.value),
   })
-}
+}, 200)
 
 onMounted(async () => {
   const settings = await sendMessage<Settings, string>(GET_SETTINGS, {})
-
+  console.log('settings', settings)
   rules.value = settings.rules || []
   autoGroup.value = settings.autoGroup
   groupByDomain.value = settings.groupByDomain
+  minCount.value = settings.minCount
 })
 
-const groupTabs = async () => {
+const groupTabs = throttle(async () => {
   await sendMessage(GROUP_TABS, {})
-}
+}, 1000)
 
 const handleExpand = (id: string) => {
   if (expand.value === id) {
@@ -49,7 +54,6 @@ const handleChange = (data: Rule) => {
     return
   }
 
-  rule.min = data.min
   rule.title = data.title
   rule.patterns = data.patterns
 
@@ -61,47 +65,59 @@ const handleDelete = (id: string) => {
   updateSettings()
 }
 
-const handleAddRule = () => {
+const handleAddRule = throttle(() => {
   const newRule: Rule = {
     id: Math.random().toString(36).slice(2),
-    title: 'Untitled',
+    title: '',
     patterns: [''],
     type: 'url',
-    min: 3,
   }
   rules.value.unshift(newRule)
   expand.value = newRule.id
 
   updateSettings()
-}
+}, 1000)
 </script>
 
 <template>
   <main class="bg-zinc-100 min-h-[300px] p-4 text-zinc-700 w-[320px]">
-    <Button class="rounded-full flex w-full" @click="groupTabs">Group Tabs</Button>
+    <Button class="rounded-full flex w-full" @click="groupTabs">Group All Tabs</Button>
 
-    <div class="mt-4 card">
-      <div class="border-b flex py-2 justify-between">
+    <div class="mt-4 p-4 card">
+      <div class="flex py-1 justify-between">
         <div>Auto Group</div>
         <Switch v-model="autoGroup"></Switch>
       </div>
-      <div class="border-b flex py-2 justify-between">
+      <div class="flex py-1 justify-between">
         <div>Group By Domain</div>
         <Switch v-model="groupByDomain"></Switch>
       </div>
+
+      <div class="flex py-1 justify-between items-center">
+        <div>Minimum Tabs Of Group</div>
+        <input
+          v-model="minCount"
+          type="number"
+          :min="2"
+          :max="9"
+          :step="1"
+          inputmode="numeric"
+          class="px-2 w-16 field"
+        />
+      </div>
     </div>
 
-    <div class="mt-4 rules card">
-      <div class="flex items-end">
+    <div class="mt-4 py-4 px-2 rules card">
+      <div class="flex px-2 items-center">
         <h2 class="font-medium text-lg">Rules</h2>
         <div
-          class="cursor-pointer flex ml-auto h-8 w-8 justify-center items-center"
+          class="cursor-pointer flex ml-auto h-6 w-6 justify-center items-center"
           @click="handleAddRule"
         >
-          <lucide-plus class="text-lg" />
+          <lucide-plus class="text-lg text-zinc-500" />
         </div>
       </div>
-      <div class="mt-2 max-h-[300px] overflow-y-auto">
+      <div class="mt-2 max-h-[300px] pr-2 overflow-y-auto">
         <RuleItem
           v-for="rule of rules"
           :key="rule.id"
@@ -125,6 +141,10 @@ const handleAddRule = () => {
 
 <style>
 .card {
-  @apply bg-white rounded-lg p-4;
+  @apply bg-white rounded-lg;
+}
+
+.field {
+  @apply bg-transparent border rounded outline-none;
 }
 </style>

@@ -1,15 +1,16 @@
-import { Rule } from '../common/types'
+import { Settings } from '../common/types'
 import { DataMap, matchRule, removeTabs, getDomain } from './helpers'
 
 export async function groupByRules(
-  rules: Rule[],
+  settings: Settings,
   tabMap: DataMap<chrome.tabs.Tab>,
   groupMap: DataMap<chrome.tabGroups.TabGroup>
 ) {
   const promises: Promise<any>[] = []
+  const rules = settings.rules
 
   rules.forEach(rule => {
-    if (!rule.title || !rule.patterns.map(pattern => pattern.trim().length).length) {
+    if (!rule.title || !rule.patterns.filter(pattern => !!pattern.trim().length).length) {
       return
     }
 
@@ -28,7 +29,7 @@ export async function groupByRules(
 
     if (group) {
       promises.push(mergeGroup(group.id, tabIds))
-    } else if (tabIds.length >= rule.min) {
+    } else if (tabIds.length >= settings.minCount) {
       promises.push(createGroup(rule.title, tabIds))
     }
   })
@@ -37,6 +38,7 @@ export async function groupByRules(
 }
 
 export async function groupByDomain(
+  settings: Settings,
   tabMap: DataMap<chrome.tabs.Tab>,
   groupMap: DataMap<chrome.tabGroups.TabGroup>,
   exact = false
@@ -66,7 +68,7 @@ export async function groupByDomain(
     const tabIds = item.map(tab => tab.id!)
     if (group) {
       mergeGroup(group.id, tabIds)
-    } else if (tabIds.length >= 3) {
+    } else if (tabIds.length >= settings.minCount) {
       createGroup(domain, tabIds)
     }
   })

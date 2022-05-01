@@ -3,11 +3,11 @@ export type Rule = {
   title: string
   patterns: string[]
   type: 'url' | 'title'
-  min: number
 }
 
 export type Settings = {
   autoGroup: boolean
   groupByDomain: boolean
+  minCount: number
   rules: Rule[]
 }

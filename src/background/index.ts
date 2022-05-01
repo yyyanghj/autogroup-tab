@@ -1,5 +1,5 @@
 import { onMessage } from 'webext-bridge'
-import { debounce } from 'lodash-es'
+import { throttle } from 'lodash-es'
 import { DataMap } from './helpers'
 import { Settings } from '../common/types'
 import { groupByRules, groupByDomain } from './group'
@@ -10,6 +10,7 @@ const settings: Settings = {
   autoGroup: true,
   groupByDomain: true,
   rules: [],
+  minCount: 3,
 }
 
 async function initSettings() {
@@ -19,6 +20,7 @@ async function initSettings() {
   settings.rules = state.rules || []
   settings.autoGroup = state.autoGroup || settings.autoGroup
   settings.groupByDomain = state.groupByDomain || settings.groupByDomain
+  settings.minCount = Math.max(1, state.minCount || 3)
 
   chrome.tabs.onCreated.addListener(() => {
     if (settings.autoGroup) {
@@ -63,7 +65,7 @@ onMessage(UPDATE_SETTINGS, async message => {
   })
 })
 
-const groupTabs = debounce(async function () {
+const groupTabs = throttle(async function () {
   const groups = await chrome.tabGroups.query({
     windowId: chrome.windows.WINDOW_ID_CURRENT,
   })
@@ -76,9 +78,9 @@ const groupTabs = debounce(async function () {
   const groupMap = new DataMap(groups)
   const tabMap = new DataMap(tabs)
 
-  await groupByRules(settings.rules, tabMap, groupMap)
+  await groupByRules(settings, tabMap, groupMap)
 
   if (settings.groupByDomain) {
-    await groupByDomain(tabMap, groupMap)
+    await groupByDomain(settings, tabMap, groupMap)
   }
 }, 200)
