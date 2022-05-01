@@ -24,7 +24,7 @@ export class DataMap<T> extends Map<string | number, T> {
 export function matchRule(tabMap: DataMap<chrome.tabs.Tab>, rule: Rule) {
   const matchers = rule.patterns
     .filter(pattern => pattern.trim().length)
-    .map(p => new RegExp(`${p}`))
+    .map(p => new RegExp(`${p.trim()}`))
 
   if (!matchers.length) {
     return []

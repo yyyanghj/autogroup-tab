@@ -94,8 +94,11 @@ const handleAddRule = () => {
     <div class="mt-4 rules card">
       <div class="flex items-end">
         <h2 class="font-medium text-lg">Rules</h2>
-        <div class="cursor-pointer ml-auto text-sm text-accent" @click="handleAddRule">
-          Add Rule
+        <div
+          class="cursor-pointer flex ml-auto h-8 w-8 justify-center items-center"
+          @click="handleAddRule"
+        >
+          <lucide-plus class="text-lg" />
         </div>
       </div>
       <div class="mt-2 max-h-[300px] overflow-y-auto">
@@ -108,6 +111,13 @@ const handleAddRule = () => {
           @change="handleChange"
           @delete="handleDelete"
         />
+        <div
+          v-if="!rules.length"
+          class="cursor-pointer text-accent text-center py-4"
+          @click="handleAddRule"
+        >
+          Add a rule now!
+        </div>
       </div>
     </div>
   </main>
