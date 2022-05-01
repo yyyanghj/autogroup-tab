@@ -9,9 +9,9 @@ import { throttle } from 'lodash-es'
 const rules = ref<Rule[]>([])
 const expand = ref('')
 
-const autoGroup = ref(false)
-const groupByDomain = ref(false)
-const minCount = ref(1)
+const autoGroup = ref(true)
+const groupByDomain = ref(true)
+const minCount = ref(2)
 
 watch([autoGroup, groupByDomain, minCount], () => {
   updateSettings()
