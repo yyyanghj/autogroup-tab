@@ -1,53 +1,78 @@
 <script setup lang="ts">
 import { sendMessage } from 'webext-bridge'
-import { ref, onMounted } from 'vue'
-import Form from './Form.vue'
-import { Rule } from '~/rule'
+import { ref, onMounted, watch } from 'vue'
+import RuleItem from './Rule.vue'
+import { Rule, Settings } from '../common/types'
+import { GET_SETTINGS, UPDATE_SETTINGS, GROUP_TABS } from '../common/constants'
 
 const rules = ref<Rule[]>([])
+const expand = ref('')
+
+const autogroup = ref(false)
+const groupByDomain = ref(false)
+
+watch([autogroup, groupByDomain], () => {
+  updateSettings()
+})
+
+const updateSettings = () => {
+  sendMessage(UPDATE_SETTINGS, {
+    rules: rules.value,
+    autogroup: autogroup.value,
+    groupByDomain: groupByDomain.value,
+  })
+}
 
 onMounted(async () => {
-  const data = await sendMessage<Rule[], 'get-rules'>('get-rules', {})
-  rules.value = data || []
+  const settings = await sendMessage<Settings, string>(GET_SETTINGS, {})
+
+  rules.value = settings.rules || []
+  autogroup.value = settings.autogroup
+  groupByDomain.value = settings.groupByDomain
 })
 
 const groupTabs = async () => {
-  await sendMessage('group-tabs', {})
+  await sendMessage(GROUP_TABS, {})
 }
 
-const autogroup = ref(false)
-
-const editing = ref<Rule | null>(null)
-
-const editRule = (rule: Rule) => {
-  editing.value = rule
+const handleExpand = (id: string) => {
+  if (expand.value === id) {
+    expand.value = ''
+  } else {
+    expand.value = id
+  }
 }
 
-const deleteRule = (id: string) => {
+const handleChange = (data: Rule) => {
+  const rule = rules.value.find(item => item.id === data.id)
+  if (!rule) {
+    return
+  }
+
+  rule.min = data.min
+  rule.title = data.title
+  rule.patterns = data.patterns
+
+  updateSettings()
+}
+
+const handleDelete = (id: string) => {
   rules.value = rules.value.filter(item => item.id !== id)
+  updateSettings()
 }
 
-const handleSave = (newRule: Rule) => {
-  const rule = editing.value
-  Object.assign(rule, newRule)
-  editing.value = null
-  sendMessage('update-rules', { rules: rules.value })
-}
-
-const handleClose = () => {
-  editing.value = null
-}
-
-const addRule = () => {
-  rules.value.push({
+const handleAddRule = () => {
+  const newRule: Rule = {
     id: Math.random().toString(36).slice(2),
     title: 'Untitled',
     patterns: [''],
     type: 'url',
     min: 3,
-  })
+  }
+  rules.value.unshift(newRule)
+  expand.value = newRule.id
 
-  sendMessage('update-rules', { rules: rules.value })
+  updateSettings()
 }
 </script>
 
@@ -56,49 +81,40 @@ const addRule = () => {
     <Button class="rounded-full flex w-full" @click="groupTabs">Group Tabs</Button>
 
     <div class="mt-4 card">
-      <!-- <div class="border-b flex py-2 justify-between">
-        <div>Autogroup Tabs</div>
+      <div class="border-b flex py-2 justify-between">
+        <div>Auto Group</div>
         <Switch v-model="autogroup"></Switch>
       </div>
       <div class="border-b flex py-2 justify-between">
         <div>Group By Domain</div>
-        <Switch v-model="autogroup"></Switch>
-      </div> -->
+        <Switch v-model="groupByDomain"></Switch>
+      </div>
     </div>
 
     <div class="mt-4 rules card">
-      <h2 class="font-medium text-lg">Rules</h2>
-      <div v-for="rule of rules" :key="rule.id" class="border-b flex py-2 rule-item">
-        <h4 class="flex-1">{{ rule.title }}</h4>
-        <div class="icon" @click="editRule(rule)">
-          <lucide-edit />
-        </div>
-        <div class="icon" @click="deleteRule(rule.id)">
-          <lucide-trash-2 />
+      <div class="flex items-end">
+        <h2 class="font-medium text-lg">Rules</h2>
+        <div class="cursor-pointer ml-auto text-sm text-accent" @click="handleAddRule">
+          Add Rule
         </div>
       </div>
-
-      <div class="mt-2">
-        <Button @click="addRule">Add Rule</Button>
+      <div class="mt-2 max-h-[300px] overflow-y-auto">
+        <RuleItem
+          v-for="rule of rules"
+          :key="rule.id"
+          :is-expand="expand === rule.id"
+          :rule="rule"
+          @expand="handleExpand"
+          @change="handleChange"
+          @delete="handleDelete"
+        />
       </div>
     </div>
-
-    <teleport to="body">
-      <Form v-if="editing" :rule="editing" @save="handleSave" @close="handleClose" />
-    </teleport>
   </main>
 </template>
 
 <style>
 .card {
   @apply bg-white rounded-lg p-4;
-}
-
-.rule-item .icon {
-  @apply rounded cursor-pointer flex flex-shrink-0  h-6 text-lg ml-2 opacity-0 text-zinc-500 w-6 justify-center items-center hover:bg-zinc-300/40;
-}
-
-.rule-item:hover .icon {
-  @apply opacity-100;
 }
 </style>

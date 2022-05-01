@@ -1,4 +1,4 @@
-import { Rule } from '../rule'
+import { Rule } from '../common/types'
 
 function getKey(item: any) {
   return item.id || ''
@@ -22,7 +22,9 @@ export class DataMap<T> extends Map<string | number, T> {
 }
 
 export function matchRule(tabMap: DataMap<chrome.tabs.Tab>, rule: Rule) {
-  const matchers = rule.patterns.filter(pattern => pattern.length).map(p => new RegExp(`${p}`))
+  const matchers = rule.patterns
+    .filter(pattern => pattern.trim().length)
+    .map(p => new RegExp(`${p}`))
 
   if (!matchers.length) {
     return []

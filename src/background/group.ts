@@ -1,4 +1,4 @@
-import { Rule } from '../rule'
+import { Rule } from '../common/types'
 import { DataMap, matchRule, removeTabs, getDomain } from './helpers'
 
 export async function groupByRules(
@@ -9,6 +9,10 @@ export async function groupByRules(
   const promises: Promise<any>[] = []
 
   rules.forEach(rule => {
+    if (!rule.title || !rule.patterns.map(pattern => pattern.trim().length).length) {
+      return
+    }
+
     const group = groupMap.find(
       group => !!(group.title && rule.title && group.title === rule.title)
     )

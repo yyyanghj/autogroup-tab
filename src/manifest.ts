@@ -13,32 +13,23 @@ export async function getManifest() {
     version: pkg.version,
     description: pkg.description,
     action: {
-      default_icon: './assets/icon-512.png',
+      default_icon: './assets/icon.png',
       default_popup: './dist/popup/index.html',
-    },
-    options_ui: {
-      page: './dist/options/index.html',
-      open_in_tab: true,
     },
     background: {
       service_worker: './dist/background/index.global.js',
     },
     icons: {
-      16: './assets/icon-512.png',
-      48: './assets/icon-512.png',
-      128: './assets/icon-512.png',
+      16: './assets/icon.png',
+      48: './assets/icon.png',
+      128: './assets/icon.png',
     },
     permissions: ['tabs', 'storage', 'activeTab', 'tabGroups'],
     host_permissions: ['*://*/*'],
-    content_scripts: [
-      {
-        matches: ['http://*/*', 'https://*/*'],
-        js: ['./dist/contentScripts/index.global.js'],
-      },
-    ],
+
     web_accessible_resources: [
       {
-        resources: ['dist/contentScripts/style.css'],
+        resources: [],
         matches: ['<all_urls>'],
       },
     ],
@@ -54,7 +45,7 @@ export async function getManifest() {
     // for content script, as browsers will cache them for each reload,
     // we use a background script to always inject the latest version
     // see src/background/contentScriptHMR.ts
-    delete manifest.content_scripts
+    // delete manifest.content_scripts
     manifest.permissions?.push('webNavigation')
   }
 

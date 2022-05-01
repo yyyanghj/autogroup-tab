@@ -1,46 +1,65 @@
 import { onMessage } from 'webext-bridge'
 import { debounce } from 'lodash-es'
 import { DataMap } from './helpers'
-import { Rule } from '../rule'
+import { Settings } from '../common/types'
 import { groupByRules, groupByDomain } from './group'
-// import { useStorageLocal } from '../composables/useStorageLocal'
+import { GET_SETTINGS, UPDATE_SETTINGS, GROUP_TABS, STORE_KEY } from '../common/constants'
+import { cloneDeep } from 'lodash-es'
 
-let rules: Rule[] = []
-
-async function init() {
-  const store = await chrome.storage.local.get('autogroup-tab-rules')
-
-  rules = store['autogroup-tab-rules'] || []
+const settings: Settings = {
+  autogroup: true,
+  groupByDomain: true,
+  rules: [],
 }
 
-init()
+async function initSettings() {
+  const store = await chrome.storage.local.get(STORE_KEY)
+  const state: Settings = store[STORE_KEY] || {}
+
+  settings.rules = state.rules || []
+  settings.autogroup = state.autogroup || settings.autogroup
+  settings.groupByDomain = state.groupByDomain || settings.groupByDomain
+
+  chrome.tabs.onCreated.addListener(() => {
+    if (settings.autogroup) {
+      groupTabs()
+    }
+  })
+
+  chrome.tabs.onUpdated.addListener(() => {
+    if (settings.autogroup) {
+      groupTabs()
+    }
+  })
+}
 
 chrome.runtime.onInstalled.addListener((): void => {
-  // eslint-disable-next-line no-console
-  console.log('Extension installed')
+  console.info('Extension installed')
 })
 
-chrome.tabs.onCreated.addListener(() => {
+const promise = initSettings()
+
+onMessage(GROUP_TABS, async () => {
   groupTabs()
 })
 
-chrome.tabs.onUpdated.addListener(() => {
-  groupTabs()
+onMessage(GET_SETTINGS, async () => {
+  try {
+    await promise
+  } catch {
+    //
+  }
+
+  return cloneDeep(settings)
 })
 
-onMessage('group-tabs', async () => {
-  groupTabs()
-})
-
-onMessage('get-rules', async () => {
-  return rules
-})
-
-onMessage('update-rules', async message => {
+onMessage(UPDATE_SETTINGS, async message => {
   const { data } = message
-  rules = (data as { rules: Rule[] }).rules
+
+  Object.assign(settings, data)
+
   chrome.storage.local.set({
-    'autogroup-tab-rules': rules,
+    [STORE_KEY]: settings,
   })
 })
 
@@ -48,6 +67,7 @@ const groupTabs = debounce(async function () {
   const groups = await chrome.tabGroups.query({
     windowId: chrome.windows.WINDOW_ID_CURRENT,
   })
+
   const tabs = await chrome.tabs.query({
     currentWindow: true,
     groupId: chrome.tabGroups.TAB_GROUP_ID_NONE,
@@ -56,6 +76,9 @@ const groupTabs = debounce(async function () {
   const groupMap = new DataMap(groups)
   const tabMap = new DataMap(tabs)
 
-  await groupByRules(rules, tabMap, groupMap)
-  await groupByDomain(tabMap, groupMap)
+  await groupByRules(settings.rules, tabMap, groupMap)
+
+  if (settings.groupByDomain) {
+    await groupByDomain(tabMap, groupMap)
+  }
 }, 200)

@@ -20,7 +20,7 @@ const handleInput = (e: Event) => {
   <input
     v-bind="$attrs"
     :value="props.modelValue"
-    class="bg-transparent border rounded-md outline-none h-8 px-4"
+    class="bg-transparent border rounded-md outline-none h-8 px-4 focus:ring-2"
     @input="handleInput"
   />
 </template>
