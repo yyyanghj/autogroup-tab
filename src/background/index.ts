@@ -7,7 +7,7 @@ import { GET_SETTINGS, UPDATE_SETTINGS, GROUP_TABS, STORE_KEY } from '../common/
 import { cloneDeep } from 'lodash-es'
 
 const settings: Settings = {
-  autogroup: true,
+  autoGroup: true,
   groupByDomain: true,
   rules: [],
 }
@@ -17,17 +17,17 @@ async function initSettings() {
   const state: Settings = store[STORE_KEY] || {}
 
   settings.rules = state.rules || []
-  settings.autogroup = state.autogroup || settings.autogroup
+  settings.autoGroup = state.autoGroup || settings.autoGroup
   settings.groupByDomain = state.groupByDomain || settings.groupByDomain
 
   chrome.tabs.onCreated.addListener(() => {
-    if (settings.autogroup) {
+    if (settings.autoGroup) {
       groupTabs()
     }
   })
 
   chrome.tabs.onUpdated.addListener(() => {
-    if (settings.autogroup) {
+    if (settings.autoGroup) {
       groupTabs()
     }
   })

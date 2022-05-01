@@ -1,6 +1,6 @@
 {
   "name": "auto-group",
-  "displayName": "Autogroup Tabs",
+  "displayName": "Auto Group Tabs",
   "version": "0.0.1",
   "description": "Automatically group tabs based on your configuration rules.",
   "private": true,

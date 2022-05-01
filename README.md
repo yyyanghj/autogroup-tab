@@ -1,1 +1,1 @@
-# Autogroup Tabs
+# Auto Group Tabs

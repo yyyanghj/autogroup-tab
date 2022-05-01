@@ -7,7 +7,7 @@ export type Rule = {
 }
 
 export type Settings = {
-  autogroup: boolean
+  autoGroup: boolean
   groupByDomain: boolean
   rules: Rule[]
 }

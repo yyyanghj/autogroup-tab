@@ -8,17 +8,17 @@ import { GET_SETTINGS, UPDATE_SETTINGS, GROUP_TABS } from '../common/constants'
 const rules = ref<Rule[]>([])
 const expand = ref('')
 
-const autogroup = ref(false)
+const autoGroup = ref(false)
 const groupByDomain = ref(false)
 
-watch([autogroup, groupByDomain], () => {
+watch([autoGroup, groupByDomain], () => {
   updateSettings()
 })
 
 const updateSettings = () => {
   sendMessage(UPDATE_SETTINGS, {
     rules: rules.value,
-    autogroup: autogroup.value,
+    autoGroup: autoGroup.value,
     groupByDomain: groupByDomain.value,
   })
 }
@@ -27,7 +27,7 @@ onMounted(async () => {
   const settings = await sendMessage<Settings, string>(GET_SETTINGS, {})
 
   rules.value = settings.rules || []
-  autogroup.value = settings.autogroup
+  autoGroup.value = settings.autoGroup
   groupByDomain.value = settings.groupByDomain
 })
 
@@ -83,7 +83,7 @@ const handleAddRule = () => {
     <div class="mt-4 card">
       <div class="border-b flex py-2 justify-between">
         <div>Auto Group</div>
-        <Switch v-model="autogroup"></Switch>
+        <Switch v-model="autoGroup"></Switch>
       </div>
       <div class="border-b flex py-2 justify-between">
         <div>Group By Domain</div>
