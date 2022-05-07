@@ -2,6 +2,8 @@
 
 A Chrome Extension that automatically group tabs based on your configuration rules.
 
+![extension.png][./screenshots/extension.png]
+
 # Features
 - [X] Auto group tabs
 - [X] Custom rules
