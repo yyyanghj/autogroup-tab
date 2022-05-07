@@ -10,4 +10,5 @@ export type Settings = {
   groupByDomain: boolean
   minCount: number
   rules: Rule[]
+  strict: boolean
 }

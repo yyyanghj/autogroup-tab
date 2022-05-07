@@ -9,6 +9,7 @@ import { cloneDeep } from 'lodash-es'
 const settings: Settings = {
   autoGroup: true,
   groupByDomain: true,
+  strict: true,
   rules: [],
   minCount: 3,
 }

@@ -44,8 +44,7 @@ export async function groupByRules(
 export async function groupByDomain(
   settings: Settings,
   tabMap: DataMap<chrome.tabs.Tab>,
-  groupMap: DataMap<chrome.tabGroups.TabGroup>,
-  exact = false
+  groupMap: DataMap<chrome.tabGroups.TabGroup>
 ) {
   const domainMap: Map<string, Array<chrome.tabs.Tab>> = new Map()
 
@@ -55,8 +54,9 @@ export async function groupByDomain(
     }
 
     let domain = getDomain(tab.url || '')
-    if (!exact) {
-      // SLD
+
+    if (!settings.strict) {
+      // different sub-domain in same group
       domain = domain.split('.').slice(-2).join('.')
     }
 

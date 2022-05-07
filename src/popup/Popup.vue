@@ -11,9 +11,11 @@ const expand = ref('')
 
 const autoGroup = ref(true)
 const groupByDomain = ref(true)
+const strict = ref(false)
+
 const minCount = ref(2)
 
-watch([autoGroup, groupByDomain, minCount], () => {
+watch([autoGroup, groupByDomain, minCount, strict], () => {
   updateSettings()
 })
 
@@ -23,16 +25,17 @@ const updateSettings = throttle(() => {
     rules: rules.value,
     autoGroup: autoGroup.value,
     groupByDomain: groupByDomain.value,
+    strict: strict.value,
     minCount: Number.isNaN(count) ? 3 : Math.max(2, minCount.value),
   })
 }, 200)
 
 onMounted(async () => {
   const settings = await sendMessage<Settings, string>(GET_SETTINGS, {})
-  console.log('settings', settings)
   rules.value = settings.rules || []
   autoGroup.value = settings.autoGroup
   groupByDomain.value = settings.groupByDomain
+  strict.value = settings.strict
   minCount.value = settings.minCount
 })
 
@@ -91,6 +94,11 @@ const handleAddRule = throttle(() => {
       <div class="flex py-1 justify-between">
         <div>Group By Domain</div>
         <Switch v-model="groupByDomain"></Switch>
+      </div>
+
+      <div v-show="groupByDomain" class="flex py-1 justify-between">
+        <div>Split Sub-domain Group</div>
+        <Switch v-model="strict"></Switch>
       </div>
 
       <div class="flex py-1 justify-between items-center">
