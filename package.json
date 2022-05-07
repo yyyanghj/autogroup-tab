@@ -5,11 +5,11 @@
   "description": "Automatically group tabs based on your configuration rules.",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=production run-s clear dev:web dev:prepare dev:bg",
+    "dev": "cross-env NODE_ENV=production run-p clear dev:web dev:prepare dev:bg",
     "dev:prepare": "esno scripts/prepare.ts",
     "dev:web": "vite build --watch",
     "dev:bg": "tsup --watch ./src",
-    "build": "cross-env NODE_ENV=production run-s clear build:web build:prepare build:bg",
+    "build": "cross-env NODE_ENV=production run-s clear build:prepare build:web build:bg",
     "build:prepare": "esno scripts/prepare.ts",
     "build:web": "vite build",
     "build:bg": "tsup",

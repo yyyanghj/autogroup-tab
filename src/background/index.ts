@@ -2,7 +2,7 @@ import { onMessage } from 'webext-bridge'
 import { throttle } from 'lodash-es'
 import { DataMap } from './helpers'
 import { Settings } from '../common/types'
-import { groupByRules, groupByDomain } from './group'
+import { groupByRules, groupByDomain, unGroupIfNotMatch } from './group'
 import { GET_SETTINGS, UPDATE_SETTINGS, GROUP_TABS, STORE_KEY } from '../common/constants'
 import { cloneDeep } from 'lodash-es'
 
@@ -28,7 +28,20 @@ async function initSettings() {
     }
   })
 
-  chrome.tabs.onUpdated.addListener(() => {
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (!changeInfo.url && !changeInfo.title) {
+      return
+    }
+
+    if (tab.groupId === chrome.tabGroups.TAB_GROUP_ID_NONE) {
+      if (settings.autoGroup) {
+        groupTabs()
+      }
+      return
+    }
+
+    unGroupIfNotMatch(tab, settings.rules)
+
     if (settings.autoGroup) {
       groupTabs()
     }

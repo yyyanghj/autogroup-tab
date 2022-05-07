@@ -1,5 +1,9 @@
-import { Settings } from '../common/types'
+import { Settings, Rule } from '../common/types'
 import { DataMap, matchRule, removeTabs, getDomain } from './helpers'
+
+// add a prefix before group title which created by domain rule
+// so that we can use this prefix to check if a group was created by domain rule
+const DOMAIN_GRUOP_PREFIX = '▴ '
 
 export async function groupByRules(
   settings: Settings,
@@ -63,13 +67,14 @@ export async function groupByDomain(
     domainMap.get(domain)!.push(tab)
   })
 
-  domainMap.forEach((item, domain) => {
-    const group = groupMap.find(group => group.title === domain)
-    const tabIds = item.map(tab => tab.id!)
+  domainMap.forEach((tabs, domain) => {
+    const groupName = DOMAIN_GRUOP_PREFIX + domain
+    const group = groupMap.find(group => group.title === groupName)
+    const tabIds = tabs.map(tab => tab.id!)
     if (group) {
       mergeGroup(group.id, tabIds)
     } else if (tabIds.length >= settings.minCount) {
-      createGroup(domain, tabIds)
+      createGroup(groupName, tabIds)
     }
   })
 }
@@ -100,4 +105,45 @@ async function createGroup(title: string, tabIds: number[]) {
       collapsed: false,
     }),
   ])
+}
+
+export async function unGroupIfNotMatch(tab: chrome.tabs.Tab, rules: Rule[]) {
+  try {
+    const group = await chrome.tabGroups.get(tab.groupId)
+
+    if (!group) {
+      return
+    }
+
+    // check if this tab auto grouped by domain
+    if (group.title?.startsWith(DOMAIN_GRUOP_PREFIX)) {
+      const domain = group.title.slice(DOMAIN_GRUOP_PREFIX.length)
+      const tabDomain = getDomain(tab.url!)
+      if (!tabDomain.includes(domain)) {
+        await chrome.tabs.ungroup([tab.id!])
+        return
+      }
+    }
+
+    const matchedRule = rules.find(rule => rule.title === group.title)
+
+    if (matchedRule) {
+      const matchers = matchedRule.patterns
+        .filter(pattern => pattern.trim().length)
+        .map(p => new RegExp(`${p.trim()}`))
+
+      const isMatch = matchers.some(matcher => {
+        return matcher.test((matchedRule.type === 'url' ? tab.url : tab.title) || '') && tab.id
+      })
+
+      if (!isMatch) {
+        // url or title was changed and does not match the rule any more,
+        // so that we should remove it from group
+        await chrome.tabs.ungroup([tab.id!])
+        return
+      }
+    }
+  } catch {
+    //
+  }
 }
