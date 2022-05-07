@@ -8,5 +8,5 @@ A Chrome Extension that automatically group tabs based on your configuration rul
 - [X] Auto group tabs
 - [X] Custom rules
 - [X] Auto group by domain
-  - [X] Strictness match (different SLD would be in different groups)
+- [X] Strictness match (different SLD would be in different groups)
 - [ ] Group by title
