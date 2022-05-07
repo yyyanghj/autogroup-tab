@@ -125,6 +125,7 @@ export async function unGroupIfNotMatch(tab: chrome.tabs.Tab, rules: Rule[]) {
       }
     }
 
+    // We assume that the name of user tab groups should be different with rule's title
     const matchedRule = rules.find(rule => rule.title === group.title)
 
     if (matchedRule) {
@@ -137,7 +138,7 @@ export async function unGroupIfNotMatch(tab: chrome.tabs.Tab, rules: Rule[]) {
       })
 
       if (!isMatch) {
-        // url or title was changed and does not match the rule any more,
+        // Tab url or title was changed and does not match the rule any more,
         // so that we should remove it from group
         await chrome.tabs.ungroup([tab.id!])
         return
